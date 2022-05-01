@@ -1,5 +1,5 @@
 FROM debian:buster-slim
-MAINTAINER Odoo S.A. <info@odoo.com>
+MAINTAINER Odoo S.A. <info@odoo.com>, Alessandro Fiorino <alessandro.fiorino@digitaldomus.it>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -17,6 +17,9 @@ RUN apt-get update && \
         libssl-dev \
         node-less \
         npm \
+		git \
+		procps \
+		net-tools \
         python3-num2words \
         python3-pdfminer \
         python3-pip \
@@ -35,6 +38,8 @@ RUN apt-get update && \
     && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
+
+RUN pip3 install wheel && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale
 
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/apt/sources.list.d/pgdg.list \

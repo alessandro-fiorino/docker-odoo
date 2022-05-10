@@ -20,6 +20,16 @@ RUN apt-get update && \
 		git \
 		procps \
 		net-tools \
+		gcc \
+		make \
+		libffi-dev \
+		libbz2-dev \
+		zlib1g-dev \
+		liblzma-dev \
+		libjpeg-dev \
+		cargo \
+		rustc \
+		libcurl4-openssl-dev \
         python3-num2words \
         python3-pdfminer \
         python3-pip \
@@ -33,13 +43,14 @@ RUN apt-get update && \
         python3-watchdog \
         python3-xlrd \
         python3-xlwt \
+		python3-dev \
         xz-utils \
     && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.buster_amd64.deb \
     && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
-RUN pip3 install wheel && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale
+RUN pip3 install wheel && pip3 install rust && pip3 install cryptography && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale
 
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/apt/sources.list.d/pgdg.list \

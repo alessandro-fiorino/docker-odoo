@@ -1,5 +1,5 @@
-FROM debian:buster-slim
-MAINTAINER Odoo S.A. <info@odoo.com>, Alessandro Fiorino <alessandro.fiorino@digitaldomus.it>
+FROM debian:bullseye-slim
+MAINTAINER Odoo S.A. <info@odoo.com>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
@@ -17,19 +17,6 @@ RUN apt-get update && \
         libssl-dev \
         node-less \
         npm \
-		git \
-		procps \
-		net-tools \
-		gcc \
-		make \
-		libffi-dev \
-		libbz2-dev \
-		zlib1g-dev \
-		liblzma-dev \
-		libjpeg-dev \
-		cargo \
-		rustc \
-		libcurl4-openssl-dev \
         python3-num2words \
         python3-pdfminer \
         python3-pip \
@@ -43,17 +30,14 @@ RUN apt-get update && \
         python3-watchdog \
         python3-xlrd \
         python3-xlwt \
-		python3-dev \
         xz-utils \
     && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.buster_amd64.deb \
     && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
-RUN pip3 install wheel && pip3 install rust && pip3 install cryptography && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale
-
 # install latest postgresql-client
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
@@ -70,9 +54,9 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/
 RUN npm install -g rtlcss
 
 # Install Odoo
-ENV ODOO_VERSION 14.0
+ENV ODOO_VERSION 16.0
 ARG ODOO_RELEASE=20221025
-ARG ODOO_SHA=3be24ed710e51041a1b23d2ae55408077572cc5a
+ARG ODOO_SHA=b05756b507d2bdad65a0d76f88b0a90719ff0e44
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \

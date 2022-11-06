@@ -27,8 +27,6 @@ RUN apt-get update && \
 		zlib1g-dev \
 		liblzma-dev \
 		libjpeg-dev \
-		cargo \
-		rustc \
 		libcurl4-openssl-dev \
         python3-num2words \
         python3-pdfminer \
@@ -50,6 +48,8 @@ RUN apt-get update && \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh rustup.sh -y
+RUN pip3 install --upgrade pip
 RUN pip3 install wheel && pip3 install rust && pip3 install cryptography && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale
 
 # install latest postgresql-client
@@ -57,7 +57,7 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
-    && gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "${repokey}" \
+    && gpg --batch --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "${repokey}" \
     && gpg --batch --armor --export "${repokey}" > /etc/apt/trusted.gpg.d/pgdg.gpg.asc \
     && gpgconf --kill all \
     && rm -rf "$GNUPGHOME" \

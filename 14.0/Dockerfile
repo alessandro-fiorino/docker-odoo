@@ -20,6 +20,7 @@ RUN apt-get update && \
 		git \
 		procps \
 		net-tools \
+		inotify-tools \
 		gcc \
 		make \
 		libffi-dev \

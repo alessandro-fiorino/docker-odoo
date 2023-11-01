@@ -24,6 +24,7 @@ RUN apt-get update && \
 		gcc \
 		make \
 		vim \
+		sudo \
 		libffi-dev \
 		libbz2-dev \
 		zlib1g-dev \
@@ -37,7 +38,6 @@ RUN apt-get update && \
         python3-pyldap \
         python3-qrcode \
         python3-renderpm \
-        python3-setuptools \
         python3-slugify \
         python3-vobject \
         python3-watchdog \
@@ -52,7 +52,7 @@ RUN apt-get update && \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh rustup.sh -y
 RUN pip3 install --upgrade pip
-RUN pip3 install wheel && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale
+RUN pip3 install wheel && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless
 
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
@@ -67,7 +67,7 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/
     && apt-get install --no-install-recommends -y postgresql-client \
     && rm -f /etc/apt/sources.list.d/pgdg.list \
     && rm -rf /var/lib/apt/lists/*
-
+	
 # Install rtlcss (on Debian buster)
 RUN npm install -g rtlcss
 
@@ -101,6 +101,7 @@ COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
 COPY neutralize.py /usr/local/bin/neutralize.py
 
 # Set default user when running the container
+ENV SHELL /bin/bash
 USER odoo
 
 ENTRYPOINT ["/entrypoint.sh"]

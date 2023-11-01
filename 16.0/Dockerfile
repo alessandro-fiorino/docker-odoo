@@ -25,6 +25,7 @@ RUN apt-get update && \
 		gcc \
 		make \
 		vim \
+		sudo \
 		libffi-dev \
 		libbz2-dev \
 		zlib1g-dev \

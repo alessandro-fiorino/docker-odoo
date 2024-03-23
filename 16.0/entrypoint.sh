@@ -38,6 +38,16 @@ case "$1" in
             exec odoo "$@" "${DB_ARGS[@]}"
         fi
         ;;
+    -- | odoo-debug)
+        shift
+        if [[ "$1" == "scaffold" ]] ; then
+            exec odoo "$@"
+        else
+            wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+			echo "Starting debugger"
+            exec /usr/bin/python3 -m debugpy --listen 0.0.0.0:8888 /usr/bin/odoo "$@" "${DB_ARGS[@]}"
+        fi
+        ;;
     -- | odoo-neutralized)
         shift
         if [[ "$1" == "scaffold" ]] ; then
@@ -46,6 +56,17 @@ case "$1" in
             wait-for-psql.py ${DB_ARGS[@]} --timeout=30
 			neutralize.py ${DB_ARGS[@]} --timeout=30
             exec odoo "$@" "${DB_ARGS[@]}"
+        fi
+        ;;		
+    -- | odoo-neutralized-debug)
+        shift
+        if [[ "$1" == "scaffold" ]] ; then
+            exec odoo "$@"
+        else
+            wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+			neutralize.py ${DB_ARGS[@]} --timeout=30
+			echo "Starting debugger"
+            exec /usr/bin/python3 -m debugpy --listen 0.0.0.0:8888 /usr/bin/odoo "$@" "${DB_ARGS[@]}"
         fi
         ;;		
     -*)

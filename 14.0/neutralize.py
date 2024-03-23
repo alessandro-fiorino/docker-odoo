@@ -31,17 +31,18 @@ if __name__ == '__main__':
             conn.close()
             for db in dbs:
                 db = db[0]
-                print("Neutralizing database: %s" % db, file=sys.stderr)
-                conn = psycopg2.connect(user=args.db_user, host=args.db_host, port=args.db_port, password=args.db_password, dbname=db)
-                cursor = conn.cursor()
-                cursor.execute("DELETE FROM ir_config_parameter WHERE key = 'database.enterprise_code'")
-                cursor.execute("UPDATE ir_cron SET active = 'f'")
-                cursor.execute("UPDATE ir_config_parameter SET value='2050-01-01' WHERE key = 'database.expiration_date'")
-                cursor.execute("UPDATE ir_mail_server SET active = 'f'")
-                cursor.execute("DELETE FROM ir_config_parameter WHERE key IN ('ocn.ocn_push_notification','odoo_ocn.project_id', 'ocn.uuid')")
-                conn.commit()
-                cursor.close()
-                conn.close()
+                if not ('-prod' in db):
+                    print("Neutralizing database: %s" % db, file=sys.stderr)
+                    conn = psycopg2.connect(user=args.db_user, host=args.db_host, port=args.db_port, password=args.db_password, dbname=db)
+                    cursor = conn.cursor()
+                    cursor.execute("DELETE FROM ir_config_parameter WHERE key = 'database.enterprise_code'")
+                    cursor.execute("UPDATE ir_cron SET active = 'f'")
+                    cursor.execute("UPDATE ir_config_parameter SET value='2050-01-01' WHERE key = 'database.expiration_date'")
+                    cursor.execute("UPDATE ir_mail_server SET active = 'f'")
+                    cursor.execute("DELETE FROM ir_config_parameter WHERE key IN ('ocn.ocn_push_notification','odoo_ocn.project_id', 'ocn.uuid')")
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
             break
         time.sleep(1)
 

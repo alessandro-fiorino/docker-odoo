@@ -25,6 +25,8 @@ fi
 # Change directory to the repository
 cd /repo
 
+GIT_SSH_COMMAND="ssh  -o 'UserKnownHostsFile /known_hosts' -i /github_deploy_key" git reset --hard
+
 # Fetch updates from the remote repository
 GIT_SSH_COMMAND="ssh -o 'UserKnownHostsFile /known_hosts' -i /github_deploy_key" git fetch origin
 

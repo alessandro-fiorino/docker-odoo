@@ -56,7 +56,7 @@ RUN apt-get update && \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh rustup.sh -y
 RUN pip3 install --upgrade pip
-RUN pip3 install wheel && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install pylibdmtx  && pip3 install debugpy
+RUN pip3 install wheel && pip3 install 'lxml==4.6.5' && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install pylibdmtx  && pip3 install debugpy && pip3 install astor
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
@@ -76,8 +76,8 @@ RUN npm install -g rtlcss
 
 # Install Odoo
 ENV ODOO_VERSION 16.0
-ARG ODOO_RELEASE=20230925
-ARG ODOO_SHA=c258ecd198cbd079fe1a271dcba23930820eb12f
+ARG ODOO_RELEASE=20240312
+ARG ODOO_SHA=900d911aecd734277f511c51e041ef92964ad55b
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
@@ -97,6 +97,11 @@ VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 # Expose Odoo services
 EXPOSE 8069 8071 8072 8888
 
+#Fixup lxml version
+RUN pip3 uninstall -y lxml
+RUN pip3 uninstall -y lxml
+RUN pip3 install 'lxml==4.6.5'
+
 # Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf
 
@@ -104,8 +109,11 @@ COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
 COPY neutralize.py /usr/local/bin/neutralize.py
 
 # Set default user when running the container
+RUN /usr/bin/chsh -s /bin/bash root
+RUN /usr/bin/chsh -s /bin/bash odoo
 ENV SHELL /bin/bash
 USER odoo
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["odoo"]
+

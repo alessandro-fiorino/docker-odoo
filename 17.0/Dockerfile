@@ -1,13 +1,18 @@
-FROM debian:buster-slim
-MAINTAINER Odoo S.A. <info@odoo.com>, Alessandro Fiorino <alessandro.fiorino@digitaldomus.it>
+FROM ubuntu:jammy
+MAINTAINER Odoo S.A. <info@odoo.com>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
 # Generate locale C.UTF-8 for postgres and general locale data
-ENV LANG C.UTF-8
+ENV LANG en_US.UTF-8
+
+# Retrieve the target architecture to install the correct wkhtmltopdf package
+ARG TARGETARCH
 
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
+
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
@@ -17,46 +22,38 @@ RUN apt-get update && \
         libssl-dev \
         node-less \
         npm \
-		git \
-		procps \
-		net-tools \
-		inotify-tools \
-		gcc \
-		make \
-		vim \
-		sudo \
-		libffi-dev \
-		libbz2-dev \
-		zlib1g-dev \
-		liblzma-dev \
-		libjpeg-dev \
-		libcurl4-openssl-dev \
+        python3-magic \
         python3-num2words \
+        python3-odf \
         python3-pdfminer \
         python3-pip \
         python3-phonenumbers \
         python3-pyldap \
         python3-qrcode \
         python3-renderpm \
+        python3-setuptools \
         python3-slugify \
         python3-vobject \
         python3-watchdog \
         python3-xlrd \
         python3-xlwt \
-		python3-dev \
-        xz-utils \
-		libdmtx0b \
-    && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.buster_amd64.deb \
-    && echo 'ea8277df4297afc507c61122f3c349af142f31e5 wkhtmltox.deb' | sha1sum -c - \
+        xz-utils && \
+    if [ -z "${TARGETARCH}" ]; then \
+        TARGETARCH="$(dpkg --print-architecture)"; \
+    fi; \
+    WKHTMLTOPDF_ARCH=${TARGETARCH} && \
+    case ${TARGETARCH} in \
+    "amd64") WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=967390a759707337b46d1c02452e2bb6b2dc6d59  ;; \
+    "arm64")  WKHTMLTOPDF_SHA=90f6e69896d51ef77339d3f3a20f8582bdf496cc  ;; \
+    "ppc64le" | "ppc64el") WKHTMLTOPDF_ARCH=ppc64el && WKHTMLTOPDF_SHA=5312d7d34a25b321282929df82e3574319aed25c  ;; \
+    esac \
+    && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${WKHTMLTOPDF_ARCH}.deb \
+    && echo ${WKHTMLTOPDF_SHA} wkhtmltox.deb | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh rustup.sh -y
-RUN pip3 install --upgrade pip
-RUN pip3 install wheel && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install python-barcode && pip3 install pylibdmtx &&  pip3 install debugpy
-
 # install latest postgresql-client
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
@@ -68,14 +65,14 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' > /etc/
     && apt-get install --no-install-recommends -y postgresql-client \
     && rm -f /etc/apt/sources.list.d/pgdg.list \
     && rm -rf /var/lib/apt/lists/*
-	
+
 # Install rtlcss (on Debian buster)
 RUN npm install -g rtlcss
 
 # Install Odoo
-ENV ODOO_VERSION 14.0
-ARG ODOO_RELEASE=20231106
-ARG ODOO_SHA=a50db3bf2d55c64bd51b6b56a2e3d0dbafc44894
+ENV ODOO_VERSION 17.0
+ARG ODOO_RELEASE=20241220
+ARG ODOO_SHA=db83c23c2c4a4b5c7881cde0c4d8868c7b9adf10
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
@@ -93,16 +90,14 @@ RUN chown odoo /etc/odoo/odoo.conf \
 VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
 # Expose Odoo services
-EXPOSE 8069 8071 8072 8888
+EXPOSE 8069 8071 8072
 
 # Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf
 
 COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
-COPY neutralize.py /usr/local/bin/neutralize.py
 
 # Set default user when running the container
-ENV SHELL /bin/bash
 USER odoo
 
 ENTRYPOINT ["/entrypoint.sh"]

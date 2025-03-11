@@ -27,7 +27,12 @@ check_config "db_host" "$HOST"
 check_config "db_port" "$PORT"
 check_config "db_user" "$USER"
 check_config "db_password" "$PASSWORD"
-
+for file in /var/lib/odoo/startup/*.sh; do
+    if [ -x $file ]; then
+        echo "Executing $file"
+        . $file || true
+    fi
+done
 case "$1" in
     -- | odoo)
         shift

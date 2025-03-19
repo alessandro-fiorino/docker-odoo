@@ -29,6 +29,8 @@ RUN apt-get update && \
 		make \
 		vim \
 		sudo \
+		zip \
+		unzip \
 		libffi-dev \
 		libbz2-dev \
 		zlib1g-dev \
@@ -69,7 +71,7 @@ RUN apt-get update && \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh rustup.sh -y
 RUN pip3 install --upgrade pip
-RUN pip3 install wheel && pip3 install 'lxml==4.6.5' && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install pylibdmtx  && pip3 install debugpy && pip3 install astor && pip3 install base45 && pip3 install sortedcontainers && pip3 install pikepdf && pip3 install openpyxl && pip3 install ftputil
+RUN pip3 install wheel && pip3 install 'lxml==4.6.5' && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install pylibdmtx  && pip3 install debugpy && pip3 install astor && pip3 install base45 && pip3 install sortedcontainers && pip3 install pikepdf && pip3 install openpyxl && pip3 install ftputil && pip3 install pysftp && pip3 install jwt
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \

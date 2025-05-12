@@ -23,6 +23,22 @@ RUN apt-get update && \
         node-less \
         npm \
         python3-magic \
+		git \
+		procps \
+		net-tools \
+		inotify-tools \
+		gcc \
+		make \
+		vim \
+		sudo \
+		zip \
+		unzip \
+		libffi-dev \
+		libbz2-dev \
+		zlib1g-dev \
+		liblzma-dev \
+		libjpeg-dev \
+		libcurl4-openssl-dev \
         python3-num2words \
         python3-odf \
         python3-pdfminer \
@@ -37,6 +53,24 @@ RUN apt-get update && \
         python3-watchdog \
         python3-xlrd \
         python3-xlwt \
+		python3-jwt \
+		python3-ftputil \
+		python3-pdfkit \
+		python3-pikepdf \
+		python3-dev \
+		python3-wheel \
+		python3-debugpy \
+		python3-xmlschema \
+		python3-astor \
+		python3-codicefiscale \
+		python3-cryptography \
+		python3-asn1crypto \
+		python3-sortedcontainers \
+		python3-openpyxl \
+		python3-lxml \
+		python3-lxml-html-clean \
+		openssh-client \
+		libdmtx0b \
         xz-utils && \
     if [ -z "${TARGETARCH}" ]; then \
         TARGETARCH="$(dpkg --print-architecture)"; \
@@ -52,6 +86,8 @@ RUN apt-get update && \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh rustup.sh -y
+RUN pip3 install --break-system-packages importlib-metadata && pip3 install --break-system-packages --ignore-installed git+https://github.com/OCA/openupgradelib.git@master  && pip3 install --break-system-packages opencv-python-headless &&  pip3 install --break-system-packages rust && pip3 install --break-system-packages pystftp && pip3 install --break-system-packages base45
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
@@ -90,12 +126,13 @@ RUN chown odoo /etc/odoo/odoo.conf \
 VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 
 # Expose Odoo services
-EXPOSE 8069 8071 8072
+EXPOSE 8069 8071 8072 8888
 
 # Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf
 
 COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
+COPY neutralize.py /usr/local/bin/neutralize.py
 
 # Set default user when running the container
 USER odoo

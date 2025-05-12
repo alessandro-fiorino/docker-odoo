@@ -25,6 +25,10 @@ RUN apt-get update && \
 		procps \
 		net-tools \
 		inotify-tools \
+		pkg-config \
+		libxml2-dev \
+		libxmlsec1-dev \
+		libxmlsec1-openssl \
 		gcc \
 		make \
 		vim \
@@ -37,6 +41,7 @@ RUN apt-get update && \
 		liblzma-dev \
 		libjpeg-dev \
 		libcurl4-openssl-dev \
+		xmlsec1 \
         python3-num2words \
         python3-odf \
         python3-pdfminer \
@@ -71,7 +76,7 @@ RUN apt-get update && \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh rustup.sh -y
 RUN pip3 install --upgrade pip
-RUN pip3 install wheel && pip3 install 'lxml==4.6.5' && pip3 install rust && pip3 install cryptography && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install pylibdmtx  && pip3 install debugpy && pip3 install astor && pip3 install base45 && pip3 install sortedcontainers && pip3 install pikepdf && pip3 install openpyxl && pip3 install ftputil && pip3 install pysftp && pip3 install jwt
+RUN pip3 install wheel && pip3 install rust && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install xmlschema && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install pylibdmtx  && pip3 install debugpy && pip3 install astor && pip3 install base45 && pip3 install sortedcontainers && pip3 install pikepdf && pip3 install openpyxl && pip3 install ftputil && pip3 install pysftp && pip3 install jwt && pip install pdfkit && pip3 install 'signxml==3.2.2'
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
@@ -113,9 +118,14 @@ VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 EXPOSE 8069 8071 8072 8888
 
 #Fixup lxml version
+RUN pip3 uninstall -y cryptography
+RUN pip3 install 'cryptography==36.0.2'
+RUN pip3 uninstall -y pyOpenSSL
+RUN pip3 install 'pyOpenSSL==21.0.0'
+RUN pip3 uninstall -y xmlsec
+RUN pip3 install 'xmlsec==1.3.12'
 RUN pip3 uninstall -y lxml
-RUN pip3 uninstall -y lxml
-RUN pip3 install 'lxml==4.6.5'
+RUN pip3 install 'lxml==4.8.0'
 
 # Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf

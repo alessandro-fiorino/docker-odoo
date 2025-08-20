@@ -52,6 +52,12 @@ case "$1" in
 			echo "Starting debugger"
             exec /usr/bin/python3 -m debugpy --listen 0.0.0.0:8888 /usr/bin/odoo "$@" "${DB_ARGS[@]}"
         fi
+        if [ $? -ne 0 ]; then
+            echo "Process exited with an error. Waiting until interrupted..."
+            tail -f /dev/null
+        else
+            echo "Process exited normally."
+        fi
         ;;
     -- | odoo-neutralized)
         shift
@@ -72,6 +78,12 @@ case "$1" in
 			neutralize.py ${DB_ARGS[@]} --timeout=30
 			echo "Starting debugger"
             exec /usr/bin/python3 -m debugpy --listen 0.0.0.0:8888 /usr/bin/odoo "$@" "${DB_ARGS[@]}"
+        fi
+        if [ $? -ne 0 ]; then
+            echo "Process exited with an error. Waiting until interrupted..."
+            tail -f /dev/null
+        else
+            echo "Process exited normally."
         fi
         ;;		
     -*)

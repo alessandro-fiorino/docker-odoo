@@ -1,10 +1,11 @@
-version: "3.9"
+
 services:
   github_downloader:
     container_name: github-${IMAGE_NAME}
     image: bitnami/git
     volumes:
-      - ${SOURCE_BASEPATH}/odoo-${IMAGE_NAME}:/repo
+      #- ${SOURCE_BASEPATH}/odoo-${IMAGE_NAME}:/repo
+      - source-${IMAGE_NAME}:/repo
       - ${DEPLOY_BASEPATH}/update_git.sh:/update_git.sh
       - ${DEPLOY_BASEPATH}/deploy_key.priv:/github_deploy_key
     environment:
@@ -14,8 +15,9 @@ services:
     entrypoint: ["sh", "-c"]
     command: ["/update_git.sh"]
     profiles:
-        - donotstart
+      - donotstart
   frontend:
+    env_file: .env
     container_name: odoo-${IMAGE_NAME}
     image: ${ODOO_BASEIMAGE}
     depends_on:
@@ -26,14 +28,31 @@ services:
         - "8069:8069"
         - "8072:8072"
     external_links:
-        - ${ODOO_DB}:db
+        - ${DB_SERVICE}:db
     volumes:
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/data:/var/lib/odoo
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/logs:/var/log
       - ${SOURCE_BASEPATH}/odoo-${IMAGE_NAME}:/mnt/extra-addons/odoo-dd-16
 #      - ${SOURCE_BASEPATH}/enterprise:/mnt/extra-addons/enterprise
+#	   - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/startup:/var/lib/odoo/startup
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/config:/etc/odoo
+
+  source-dev:
+    env_file: .env
+    container_name: odoo-source-${IMAGE_NAME}
+    image: ${ODOO_BASEIMAGE}
+    command: tail -f /dev/null
+    profiles:
+      - donotstart
+    depends_on:
+      github_downloader:
+        condition: service_completed_successfully
+    volumes:
+      - ${SOURCE_BASEPATH}/odoo-${IMAGE_NAME}:/mnt/extra-addons/odoo-dd-16
+#      - ${SOURCE_BASEPATH}/enterprise:/mnt/extra-addons/enterprise
+      - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/source-dev:/root        
   nginx:
+    env_file: .env
     container_name: nginx-${IMAGE_NAME}
     image: nginx:latest
     restart: unless-stopped
@@ -45,12 +64,14 @@ services:
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/certbot/conf:/etc/nginx/ssl
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/certbot/data:/var/www/html
   mailhog:
+    env_file: .env
     container_name: mailhog-${IMAGE_NAME}
     image: mailhog/mailhog
     ports:
        - 1025:1025
        - 8025:8025       
   certbot:
+    env_file: .env
     container_name: certbot-${IMAGE_NAME}
     image: certbot/certbot:latest
     command: certonly --webroot --webroot-path=/var/www/html --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${EXT_DOMAIN}
@@ -58,9 +79,10 @@ services:
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/certbot/conf:/etc/letsencrypt
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/logs:/var/log/letsencrypt
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/data:/var/www/html
-
+    profiles:
+      - donotstart
 networks: 
   default: 
-    external: 
-      name: ${NETWORK}
+    name: ${DB_NETWORK_NAME}
+    external: true
 

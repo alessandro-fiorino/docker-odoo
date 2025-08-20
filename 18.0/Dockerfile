@@ -27,6 +27,10 @@ RUN apt-get update && \
 		procps \
 		net-tools \
 		inotify-tools \
+		pkg-config \
+		libxml2-dev \
+		libxmlsec1-dev \
+		libxmlsec1-openssl \
 		gcc \
 		make \
 		vim \
@@ -39,6 +43,7 @@ RUN apt-get update && \
 		liblzma-dev \
 		libjpeg-dev \
 		libcurl4-openssl-dev \
+		xmlsec1 \
         python3-num2words \
         python3-odf \
         python3-pdfminer \

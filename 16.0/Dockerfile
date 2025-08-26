@@ -129,6 +129,8 @@ RUN pip3 install 'lxml==4.8.0'
 RUN pip3 uninstall -y xmlschema
 RUN pip3 install 'xmlschema==3.4.3'
 RUN pip3 install 'bokeh==3.1.1'
+RUN pip3 uninstall -y paramiko
+RUN pip3 install 'paramiko==3.5.1'
 RUN pip3 install 'openai'
 # Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf

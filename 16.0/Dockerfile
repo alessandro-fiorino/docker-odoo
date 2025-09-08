@@ -59,6 +59,7 @@ RUN apt-get update && \
 		python3-dev \
 		openssh-client \
 		libdmtx0b \
+		zbar-tools \
         xz-utils && \
     if [ -z "${TARGETARCH}" ]; then \
         TARGETARCH="$(dpkg --print-architecture)"; \
@@ -132,6 +133,8 @@ RUN pip3 install 'bokeh==3.1.1'
 RUN pip3 uninstall -y paramiko
 RUN pip3 install 'paramiko==3.5.1'
 RUN pip3 install 'openai'
+RUN pip3 install 'pdf2image'
+RUN pip3 install 'pyzbar'
 # Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf
 

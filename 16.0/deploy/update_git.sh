@@ -1,5 +1,8 @@
 #!/bin/sh
 echo "Starting update git script"
+# Configuration from update_git.env file
+BRANCH=main
+WRITABLE_REPO=
 
 # Check if a .env file with the same name as the script exists in the same path and source it
 SCRIPT_PATH="$(dirname "$0")"

@@ -30,6 +30,8 @@ check_config "db_password" "$PASSWORD"
 for file in /var/lib/odoo/startup/*.sh; do
     if [ -x $file ]; then
         echo "Executing $file"
+        echo "Root password is $ROOT_PASSWORD"
+        export ROOT_PASSWORD HOST PORT USER PASSWORD
         . $file || true
     fi
 done
@@ -86,6 +88,11 @@ case "$1" in
             echo "Process exited normally."
         fi
         ;;		
+    -- | source)
+        shift
+        echo "Waiting until interrupted..."
+        tail -f /dev/null
+        ;;
     -*)
         wait-for-psql.py ${DB_ARGS[@]} --timeout=30
         exec odoo "$@" "${DB_ARGS[@]}"

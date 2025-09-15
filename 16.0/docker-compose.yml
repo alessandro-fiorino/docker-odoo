@@ -40,8 +40,11 @@ services:
   source-dev:
     env_file: .env
     container_name: odoo-source-${IMAGE_NAME}
-    image: ${ODOO_BASEIMAGE}
-    command: tail -f /dev/null
+    # password di root da cambiare
+    environment:
+      - ROOT_PASSWORD=admin    
+    user: root
+    command: source
     profiles:
       - donotstart
     depends_on:
@@ -50,6 +53,7 @@ services:
     volumes:
       - ${SOURCE_BASEPATH}/odoo-${IMAGE_NAME}:/mnt/extra-addons/odoo-dd-16
 #      - ${SOURCE_BASEPATH}/enterprise:/mnt/extra-addons/enterprise
+#	   - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/source-dev/startup:/var/lib/odoo/startup
       - ${DATA_BASEPATH}/odoo-${IMAGE_NAME}/source-dev:/root        
   nginx:
     env_file: .env

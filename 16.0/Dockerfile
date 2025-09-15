@@ -29,6 +29,7 @@ RUN apt-get update && \
 		libxml2-dev \
 		libxmlsec1-dev \
 		libxmlsec1-openssl \
+		openssh-server \
 		gcc \
 		make \
 		vim \

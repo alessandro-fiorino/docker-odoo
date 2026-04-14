@@ -1,0 +1,104 @@
+#!/bin/bash
+
+set -e
+
+if [ -v PASSWORD_FILE ]; then
+    PASSWORD="$(< $PASSWORD_FILE)"
+fi
+
+# set the postgres database host, port, user and password according to the environment
+# and pass them as arguments to the odoo process if not present in the config file
+: ${HOST:=${DB_PORT_5432_TCP_ADDR:='db'}}
+: ${PORT:=${DB_PORT_5432_TCP_PORT:=5432}}
+: ${USER:=${DB_ENV_POSTGRES_USER:=${POSTGRES_USER:='odoo'}}}
+: ${PASSWORD:=${DB_ENV_POSTGRES_PASSWORD:=${POSTGRES_PASSWORD:='odoo'}}}
+
+DB_ARGS=()
+function check_config() {
+    param="$1"
+    value="$2"
+    if grep -q -E "^\s*\b${param}\b\s*=" "$ODOO_RC" ; then       
+        value=$(grep -E "^\s*\b${param}\b\s*=" "$ODOO_RC" |cut -d " " -f3|sed 's/["\n\r]//g')
+    fi;
+    DB_ARGS+=("--${param}")
+    DB_ARGS+=("${value}")
+}
+check_config "db_host" "$HOST"
+check_config "db_port" "$PORT"
+check_config "db_user" "$USER"
+check_config "db_password" "$PASSWORD"
+for file in /var/lib/odoo/startup/*.sh; do
+    if [ -x $file ]; then
+        echo "Executing $file"
+        echo "Root password is $ROOT_PASSWORD"
+        export ROOT_PASSWORD HOST PORT USER PASSWORD
+        . $file || true
+    fi
+done
+case "$1" in
+    -- | odoo)
+        shift
+        if [[ "$1" == "scaffold" ]] ; then
+            exec odoo "$@"
+        else
+            wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+            exec odoo "$@" "${DB_ARGS[@]}"
+        fi
+        ;;
+    -- | odoo-debug)
+        shift
+        if [[ "$1" == "scaffold" ]] ; then
+            exec odoo "$@"
+        else
+            wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+			echo "Starting debugger"
+            exec /usr/bin/python3 -m debugpy --listen 0.0.0.0:8888 /usr/bin/odoo "$@" "${DB_ARGS[@]}"
+        fi
+        if [ $? -ne 0 ]; then
+            echo "Process exited with an error. Waiting until interrupted..."
+            tail -f /dev/null
+        else
+            echo "Process exited normally."
+        fi
+        ;;
+    -- | odoo-neutralized)
+        shift
+        if [[ "$1" == "scaffold" ]] ; then
+            exec odoo "$@"
+        else
+            wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+			neutralize.py ${DB_ARGS[@]} --timeout=30
+            exec odoo "$@" "${DB_ARGS[@]}"
+        fi
+        ;;		
+    -- | odoo-neutralized-debug)
+        shift
+        if [[ "$1" == "scaffold" ]] ; then
+            exec odoo "$@"
+        else
+            wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+			neutralize.py ${DB_ARGS[@]} --timeout=30
+			echo "Starting debugger"
+            exec /usr/bin/python3 -m debugpy --listen 0.0.0.0:8888 /usr/bin/odoo "$@" "${DB_ARGS[@]}"
+        fi
+        if [ $? -ne 0 ]; then
+            echo "Process exited with an error. Waiting until interrupted..."
+            tail -f /dev/null
+        else
+            echo "Process exited normally."
+        fi
+        ;;		
+    -- | source)
+        shift
+        echo "Waiting until interrupted..."
+        tail -f /dev/null
+        ;;
+    -*)
+        wait-for-psql.py ${DB_ARGS[@]} --timeout=30
+        exec odoo "$@" "${DB_ARGS[@]}"
+        ;;
+    *)
+        exec "$@"
+esac
+
+exit 1

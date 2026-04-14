@@ -1,16 +1,18 @@
-FROM debian:bullseye-slim
+FROM ubuntu:noble
 MAINTAINER Odoo S.A. <info@odoo.com>
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
 # Generate locale C.UTF-8 for postgres and general locale data
-ENV LANG C.UTF-8
+ENV LANG en_US.UTF-8
 
 # Retrieve the target architecture to install the correct wkhtmltopdf package
 ARG TARGETARCH
 
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
+
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
@@ -67,11 +69,11 @@ RUN apt-get update && \
     fi; \
     WKHTMLTOPDF_ARCH=${TARGETARCH} && \
     case ${TARGETARCH} in \
-    "amd64") WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=9df8dd7b1e99782f1cfa19aca665969bbd9cc159  ;; \
-    "arm64")  WKHTMLTOPDF_SHA=58c84db46b11ba0e14abb77a32324b1c257f1f22  ;; \
-    "ppc64le" | "ppc64el") WKHTMLTOPDF_ARCH=ppc64el && WKHTMLTOPDF_SHA=7ed8f6dcedf5345a3dd4eeb58dc89704d862f9cd  ;; \
+    "amd64") WKHTMLTOPDF_ARCH=amd64 && WKHTMLTOPDF_SHA=967390a759707337b46d1c02452e2bb6b2dc6d59  ;; \
+    "arm64")  WKHTMLTOPDF_SHA=90f6e69896d51ef77339d3f3a20f8582bdf496cc  ;; \
+    "ppc64le" | "ppc64el") WKHTMLTOPDF_ARCH=ppc64el && WKHTMLTOPDF_SHA=5312d7d34a25b321282929df82e3574319aed25c  ;; \
     esac \
-    && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bullseye_${WKHTMLTOPDF_ARCH}.deb \
+    && curl -o wkhtmltox.deb -sSL https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.jammy_${WKHTMLTOPDF_ARCH}.deb \
     && echo ${WKHTMLTOPDF_SHA} wkhtmltox.deb | sha1sum -c - \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
@@ -80,7 +82,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o rustup.sh && sh
 RUN pip3 install --upgrade pip
 RUN pip3 install wheel && pip3 install rust && pip3 install asn1crypto && pip3 install importlib-metadata && pip3 install --ignore-installed git+https://github.com/OCA/openupgradelib.git@master && pip3 install codicefiscale && pip3 install opencv-python-headless && pip3 install pylibdmtx  && pip3 install debugpy && pip3 install astor && pip3 install base45 && pip3 install sortedcontainers && pip3 install pikepdf && pip3 install openpyxl && pip3 install ftputil && pip3 install pysftp && pip3 install jwt && pip install pdfkit && pip3 install 'signxml==3.2.2'
 # install latest postgresql-client
-RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
+RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
     && export GNUPGHOME \
     && repokey='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8' \
@@ -97,9 +99,9 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main' > /et
 RUN npm install -g rtlcss
 
 # Install Odoo
-ENV ODOO_VERSION 16.0
-ARG ODOO_RELEASE=20250819
-ARG ODOO_SHA=6e4d8446d4a6af7c147f84a5b3d824a7ddaec5c5
+ENV ODOO_VERSION 19.0
+ARG ODOO_RELEASE=20260409
+ARG ODOO_SHA=1b856fbdb3e1f62e695d53e0642ba4bbf03859b9
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
@@ -119,20 +121,6 @@ VOLUME ["/var/lib/odoo", "/mnt/extra-addons"]
 # Expose Odoo services
 EXPOSE 8069 8071 8072 8888
 
-#Fixup lxml version
-RUN pip3 uninstall -y cryptography
-RUN pip3 install 'cryptography==36.0.2'
-RUN pip3 uninstall -y pyOpenSSL
-RUN pip3 install 'pyOpenSSL==21.0.0'
-RUN pip3 uninstall -y xmlsec
-RUN pip3 install 'xmlsec==1.3.12'
-RUN pip3 uninstall -y lxml
-RUN pip3 install 'lxml==4.8.0'
-RUN pip3 uninstall -y xmlschema
-RUN pip3 install 'xmlschema==3.4.3'
-RUN pip3 install 'bokeh==3.1.1'
-RUN pip3 uninstall -y paramiko
-RUN pip3 install 'paramiko==3.5.1'
 RUN pip3 install 'openai'
 RUN pip3 install 'pdf2image'
 RUN pip3 install 'pyzbar'

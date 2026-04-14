@@ -74,6 +74,7 @@ RUN apt-get update && \
 		python3-openpyxl \
 		python3-lxml \
 		python3-lxml-html-clean \
+		python3-pyzbar \
 		openssh-client \
 		libdmtx0b \
         xz-utils && \
@@ -119,6 +120,8 @@ RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/od
     && apt-get update \
     && apt-get -y install --no-install-recommends ./odoo.deb \
     && rm -rf /var/lib/apt/lists/* odoo.deb
+
+RUN pip3 install 'pdf2image' --break-system-packages
 
 # Copy entrypoint script and Odoo configuration file
 COPY ./entrypoint.sh /

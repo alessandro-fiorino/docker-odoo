@@ -136,6 +136,7 @@ RUN pip3 install 'paramiko==3.5.1'
 RUN pip3 install 'openai'
 RUN pip3 install 'pdf2image'
 RUN pip3 install 'pyzbar'
+
 # Set the default config file
 ENV ODOO_RC /etc/odoo/odoo.conf
 

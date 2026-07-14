@@ -1,10 +1,10 @@
 FROM ubuntu:noble
-MAINTAINER Odoo S.A. <info@odoo.com>
+LABEL maintainer="Odoo S.A. <info@odoo.com>"
 
 SHELL ["/bin/bash", "-xo", "pipefail", "-c"]
 
 # Generate locale C.UTF-8 for postgres and general locale data
-ENV LANG en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 # Retrieve the target architecture to install the correct wkhtmltopdf package
 ARG TARGETARCH
@@ -99,9 +99,9 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/a
 RUN npm install -g rtlcss
 
 # Install Odoo
-ENV ODOO_VERSION 19.0
-ARG ODOO_RELEASE=20260409
-ARG ODOO_SHA=1b856fbdb3e1f62e695d53e0642ba4bbf03859b9
+ENV ODOO_VERSION=19.0
+ARG ODOO_RELEASE=20260630
+ARG ODOO_SHA=061db8d7bf1a8e42d6a684b1484cb6d6435dcbac
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
@@ -125,7 +125,7 @@ RUN pip3 install 'openai'
 RUN pip3 install 'pdf2image'
 RUN pip3 install 'pyzbar'
 # Set the default config file
-ENV ODOO_RC /etc/odoo/odoo.conf
+ENV ODOO_RC=/etc/odoo/odoo.conf
 
 COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
 COPY neutralize.py /usr/local/bin/neutralize.py

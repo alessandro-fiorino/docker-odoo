@@ -36,7 +36,7 @@ for file in /var/lib/odoo/startup/*.sh; do
     fi
 done
 case "$1" in
-    -- | odoo)
+    --|odoo)
         shift
         if [[ "$1" == "scaffold" ]] ; then
             exec odoo "$@"
@@ -45,7 +45,7 @@ case "$1" in
             exec odoo "$@" "${DB_ARGS[@]}"
         fi
         ;;
-    -- | odoo-debug)
+    --|odoo-debug)
         shift
         if [[ "$1" == "scaffold" ]] ; then
             exec odoo "$@"
@@ -61,7 +61,7 @@ case "$1" in
             echo "Process exited normally."
         fi
         ;;
-    -- | odoo-neutralized)
+    --|odoo-neutralized)
         shift
         if [[ "$1" == "scaffold" ]] ; then
             exec odoo "$@"
@@ -71,7 +71,7 @@ case "$1" in
             exec odoo "$@" "${DB_ARGS[@]}"
         fi
         ;;		
-    -- | odoo-neutralized-debug)
+    --|odoo-neutralized-debug)
         shift
         if [[ "$1" == "scaffold" ]] ; then
             exec odoo "$@"
@@ -88,7 +88,7 @@ case "$1" in
             echo "Process exited normally."
         fi
         ;;		
-    -- | source)
+    --|source)
         shift
         echo "Waiting until interrupted..."
         tail -f /dev/null

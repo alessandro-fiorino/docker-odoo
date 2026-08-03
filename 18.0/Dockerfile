@@ -73,8 +73,8 @@ RUN apt-get update && \
 
 # Install Odoo
 ENV ODOO_VERSION=18.0
-ARG ODOO_RELEASE=20260723
-ARG ODOO_SHA=01d1e7c6da2caa8f69424efaebfcf0f901996c7b
+ARG ODOO_RELEASE=20260803
+ARG ODOO_SHA=25ab944dc7af9959fc3cca6a27b7aeb9b769435b
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \

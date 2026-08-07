@@ -121,7 +121,21 @@ RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/od
     && apt-get -y install --no-install-recommends ./odoo.deb \
     && rm -rf /var/lib/apt/lists/* odoo.deb
 
+RUN pip3 install 'openupgradelib' --break-system-packages
 RUN pip3 install 'pdf2image' --break-system-packages
+RUN pip3 install 'markdownify' --break-system-packages
+RUN pip3 install 'google-cloud-aiplatform' --break-system-packages --ignore-installed
+RUN pip3 install 'rjsmin' --break-system-packages
+RUN pip3 install 'google-genai' --break-system-packages
+RUN pip3 install 'replicate' --break-system-packages
+RUN pip3 install 'PyMuPDF' --break-system-packages
+RUN pip3 install 'pyyaml' --break-system-packages
+RUN pip3 install 'markdown2' --break-system-packages
+RUN pip3 install 'emoji' --break-system-packages
+RUN pip3 install 'pydantic' --break-system-packages
+RUN pip3 install 'mcp' --break-system-packages --ignore-installed
+RUN pip3 install 'pdfrw' --break-system-packages
+RUN pip3 install 'openai' --break-system-packages --ignore-installed
 
 # Copy entrypoint script and Odoo configuration file
 COPY ./entrypoint.sh /

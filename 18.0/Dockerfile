@@ -12,7 +12,6 @@ ARG TARGETARCH
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
@@ -21,7 +20,6 @@ RUN apt-get update && \
         gnupg \
         libssl-dev \
         node-less \
-        npm \
         python3-magic \
 		git \
 		procps \
@@ -109,12 +107,16 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/a
     && rm -rf /var/lib/apt/lists/*
 
 # Install rtlcss (on Debian buster)
-RUN npm install -g rtlcss
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends nodejs npm \
+    && npm install -g rtlcss \
+    && apt-get purge --autoremove -y npm \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo
 ENV ODOO_VERSION=18.0
-ARG ODOO_RELEASE=20260630
-ARG ODOO_SHA=a6a0989209a2d98fd6c9a8fdc9b3b37c43ac73ae
+ARG ODOO_RELEASE=20260723
+ARG ODOO_SHA=01d1e7c6da2caa8f69424efaebfcf0f901996c7b
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \

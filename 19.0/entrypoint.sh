@@ -36,9 +36,7 @@ for file in /var/lib/odoo/startup/*.sh; do
         echo "Root password is $ROOT_PASSWORD"
         export ROOT_PASSWORD HOST PORT USER PASSWORD
         . $file || true
-    fi
-done
-case "$1" in
+    ficase "$1" in
     -- | odoo)
         shift
         if [[ "$1" == "scaffold" ]] ; then

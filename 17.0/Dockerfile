@@ -21,7 +21,6 @@ RUN apt-get update && \
         gnupg \
         libssl-dev \
         node-less \
-        npm \
         python3-magic \
         python3-num2words \
         python3-odf \
@@ -67,12 +66,15 @@ RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jammy-pgdg main' > /etc/a
     && rm -rf /var/lib/apt/lists/*
 
 # Install rtlcss (on Debian buster)
-RUN npm install -g rtlcss
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends nodejs npm \
+    && npm install -g rtlcss \
+    && apt-get purge --autoremove -y npm \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo
-ENV ODOO_VERSION=17.0
-ARG ODOO_RELEASE=20260630
-ARG ODOO_SHA=51a6dfb4165c0b9b90c0033192074e3efa585a2f
+ARG ODOO_RELEASE=20260723
+ARG ODOO_SHA=5ff18afa5597d4ac5498d1ea788c0ea8d7b80ef4
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
     && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
@@ -94,7 +96,6 @@ EXPOSE 8069 8071 8072
 
 # Set the default config file
 ENV ODOO_RC=/etc/odoo/odoo.conf
-
 COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
 
 # Set default user when running the container
